@@ -51,21 +51,21 @@ N times Effective data excluding command symbols, with N < 32
 
 //Fast manipulation of LED IO. 
 //These defines are for a LED connected on D13
-/*#define OUT_LED() DDRB |= (1 << 5);
-#define SET_LED() PORTB |= (1 << 5)
-#define CLR_LED() PORTB &= ~(1 << 5)
-*/
+//#define OUT_LED() DDRB |= (1 << 5);
+//#define SET_LED() PORTB |= (1 << 5)
+//#define CLR_LED() PORTB &= ~(1 << 5)
+
 
 //These defines are for a RGB led connected to D2, D3, D4
-/*#define OUT_LED() DDRD |= ((1 << 2) | (1 << 3) | (1 << 4))
+#define OUT_LED() DDRD |= ((1 << 2) | (1 << 3) | (1 << 4))
 #define SET_LED() PORTD |= ((1 << 2) | (1 << 3) | (1 << 4))
 #define CLR_LED() PORTD &= ~((1 << 2) | (1 << 3) | (1 << 4))
-*/
+
 
 //These defines are for a single led connected to D2
-#define OUT_LED() DDRD |= ((1 << 2))
-#define SET_LED() PORTD |= ((1 << 2))
-#define CLR_LED() PORTD &= ~((1 << 2))
+//#define OUT_LED() DDRD |= ((1 << 2))
+//#define SET_LED() PORTD |= ((1 << 2))
+//#define CLR_LED() PORTD &= ~((1 << 2))
 
 
 
@@ -130,17 +130,18 @@ void init_frame(unsigned char * frame){
 
 int create_frame(char * data, int data_size, unsigned char * frame){
   memcpy(&(frame[5]), data, data_size);
-  frame[5+data_size] = ETX;
+  frame[5+data_size] = calc_crc(data, data_size);
+  frame[5+data_size+1] = ETX;
   return 1 ;
 }
 
 int write(char * data, int data_size){
   if(frame_index >=  0) return -1 ;
-  if(data_size > 32) return -1 ;
+  if(data_size > 31) return -1 ;
   create_frame(data, data_size,frame_buffer);
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
     frame_index = 0 ;
-    frame_size = data_size + 6 ;
+    frame_size = data_size + 7 ;
   }
   return 0 ;
 }
@@ -166,6 +167,16 @@ void setup() {
   Timer1.attachInterrupt(emit_half_bit); 
 }
 
+
+unsigned char calc_crc(char * msg, int msg_length)
+{
+    unsigned char crc = 0;   // Resultat sur 8 bits
+    //--- Calcul de la somme, le premier caractère est en position 1
+    for (int i = 0; i < msg_length; i++)
+        crc += msg[i];
+    //--- Modulo Valeur Maxi sur 8 Bits
+    return (crc %= 0xFF);
+}
 
 // the loop routine runs over and over again forever:
 char * msg = "Hello World" ;
