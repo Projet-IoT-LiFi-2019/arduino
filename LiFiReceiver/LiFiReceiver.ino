@@ -231,11 +231,23 @@ void setup() {
 
 }
 
+unsigned char calc_crc(char * msg, int msg_length)
+{
+    unsigned char crc = 0;   // Resultat sur 8 bits
+    //--- Calcul de la somme, le premier caractère est en position 1
+    for (int i = 0; i < msg_length; i++)
+        crc += msg[i];
+    //--- Modulo Valeur Maxi sur 8 Bits
+    return (crc %= 0xFF);
+}
 
 // the loop routine runs over and over again forever:
 void loop() {
   int i; 
   unsigned char received_data;
+  unsigned char crc, calculated_crc;
+  char * data;
+  int data_size;
   char received_data_print ;
   int nb_shift ;
   int byte_added = 0 ;
@@ -257,8 +269,13 @@ void loop() {
     #endif
     new_word = 0 ;
     if((byte_added = add_byte_to_frame(frame_buffer, &frame_index, &frame_size, &frame_state,received_data)) > 0){
-      frame_buffer[frame_size-1] = '\0';
-      Serial.println(&(frame_buffer[1]));
+      data_size = frame_size-2;
+      crc = frame_buffer[data_size];
+      frame_buffer[data_size] = '\0';
+      data = &(frame_buffer[1]);
+      calculated_crc = calc_crc(data, data_size);
+      if(calculated_crc == crc)
+        Serial.println(data);
     }
     //if(frame_state != IDLE) Serial.println(received_data, HEX);
   }
