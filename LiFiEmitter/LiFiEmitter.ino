@@ -43,6 +43,7 @@ N times Effective data excluding command symbols, with N < 32
 // will lower values will result in faster communication
 // the receiver must be tuned to the same value
 #define SYMBOL_PERIOD 500 /* Defined a symbol period in us*/
+#define SAMPLE_PER_SYMBOL 4
 
 #define WORD_LENGTH 10 /* Each byte is encoded on 10-bit with start, byte, stop */
 #define SYNC_SYMBOL 0xD5 /* Synchronization symbol to send after a preamble, before data communication happens */
@@ -156,6 +157,17 @@ void init_emitter(){
   bit_counter = WORD_LENGTH * 2 ;
 }
 
+void sample_signal_edge(){
+  
+}
+
+void isr(){
+  static int i = 0;
+  if(i == 0) emit_half_bit();
+  else sample_signal_edge();
+  i = (i+1) % SAMPLE_PER_SYMBOL;
+}
+
 // the setup routine runs once when you press reset:
 void setup() {
   // initialize serial communication at 115200 bits per second:
@@ -163,8 +175,8 @@ void setup() {
   OUT_LED();
   init_frame(frame_buffer);
   init_emitter();
-  Timer1.initialize(SYMBOL_PERIOD); //1200 bauds
-  Timer1.attachInterrupt(emit_half_bit); 
+  Timer1.initialize(SYMBOL_PERIOD/SAMPLE_PER_SYMBOL); //1200 bauds for transmission, else we listen for ACK
+  Timer1.attachInterrupt(isr); 
 }
 
 
