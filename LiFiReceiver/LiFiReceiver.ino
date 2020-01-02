@@ -1,5 +1,6 @@
 #include <TimerOne.h>
 #include "receiver_types.h"
+#include "crc.h"
 
 
 /*
@@ -220,25 +221,14 @@ int add_byte_to_frame(char * frame_buffer, int * frame_index, int * frame_size, 
 // the setup routine runs once when you press reset:
 void setup() {
   // initialize serial communication at 115200 bits per second:
-  int i; 
   Serial.begin(115200);
   Serial.println("Start of receiver program");
   ADC_setup();
   ADC_start_conversion(SENSOR_PIN);
-  //analogReference(INTERNAL); // internal reference is 1.1v, should give better accuracy for the mv range of the led output.
+  //  analogReference(INTERNAL); // internal reference is 1.1v, should give better accuracy for the mv range of the led output.
   Timer1.initialize(SYMBOL_PERIOD/SAMPLE_PER_SYMBOL); //1200 bauds oversampled by factor 4
   Timer1.attachInterrupt(sample_signal_edge);
 
-}
-
-unsigned char calc_crc(char * msg, int msg_length)
-{
-    unsigned char crc = 0;   // Resultat sur 8 bits
-    //--- Calcul de la somme, le premier caractère est en position 1
-    for (int i = 0; i < msg_length; i++)
-        crc += msg[i];
-    //--- Modulo Valeur Maxi sur 8 Bits
-    return (crc %= 0xFF);
 }
 
 // the loop routine runs over and over again forever:
@@ -274,7 +264,7 @@ void loop() {
       frame_buffer[data_size] = '\0';
       data = &(frame_buffer[1]);
       calculated_crc = calc_crc(data, data_size);
-      if(calculated_crc == crc)
+      //if(calculated_crc == crc)
         Serial.println(data);
     }
     //if(frame_state != IDLE) Serial.println(received_data, HEX);
