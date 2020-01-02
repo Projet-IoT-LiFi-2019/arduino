@@ -165,7 +165,7 @@ void isr(){
   static int i = 0;
   if(i == 0) emit_half_bit();
   else sample_signal_edge();
-  i = (i+1) % SAMPLE_PER_SYMBOL;
+  i = ++i % SAMPLE_PER_SYMBOL;
 }
 
 // the setup routine runs once when you press reset:
