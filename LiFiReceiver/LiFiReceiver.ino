@@ -7,8 +7,7 @@ void setup() {
   // initialize serial communication at 115200 bits per second:
   Serial.begin(115200);
   Serial.println("Start of receiver program");
-  ADC_setup();
-  ADC_start_conversion(SENSOR_PIN);
+  init_receiver();
   Timer1.initialize(SYMBOL_PERIOD/SAMPLE_PER_SYMBOL); //1200 bauds oversampled by factor 4
   Timer1.attachInterrupt(sample_signal_edge);
 }

@@ -1,6 +1,3 @@
-#include "receiver_types.h"
-#include "transmission_constants.h"
-
 /*
 LiFi Emitter and Receiver
 
@@ -32,10 +29,14 @@ N times Effective data excluding command symbols, max length 32 bytes
 0x03 : ETX end of frame
 */
 
+#include "receiver_types.h"
+#include "transmission_constants.h"
+
+
 //#define DEBUG
 //#define DEBUG_ANALOG
-
 #define INT_REF /* Commen this to use AVCC reference voltage. To be used when the receiver LED generate low levels */
+#define SENSOR_PIN 3
 
 // global variables for frame decoding
 enum receiver_state frame_state = IDLE ;
@@ -65,6 +66,11 @@ int ADC_read_conversion(){
  return ADC ;
 }
 //End of ADC management functions
+
+void init_receiver(){
+  ADC_setup();
+  ADC_start_conversion(SENSOR_PIN);
+}
 
 #define START_SYMBOL 0x02
 #define STOP_SYMBOL 0x01
