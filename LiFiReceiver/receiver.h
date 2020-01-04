@@ -29,8 +29,21 @@ N times Effective data excluding command symbols, max length 32 bytes
 0x03 : ETX end of frame
 */
 
+
+#ifndef RECEIVER_TYPES_H
+#define RECEIVER_TYPES_H
 #include "receiver_types.h"
+#endif
+
+#ifndef TRANSMISSION_CONSTANTS_H
+#define TRANSMISSION_CONSTANTS_H
 #include "transmission_constants.h"
+#endif
+
+#ifndef CRC_H
+#define CRC_H
+#include "crc.h"
+#endif
 
 
 //#define DEBUG
