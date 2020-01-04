@@ -66,12 +66,17 @@ void loop() {
     }
   }
 
-  // writing to buffer only if crc has changed, i.e. a new frame has been received
-  if(previously_acknowledged_crc != crc_to_acknowledge) {
-    #ifdef DEBUG
-    Serial.print("Acknowledging ");
-    Serial.println(crc_to_acknowledge);
-    #endif
-    write_ack_to_buffer(crc_to_acknowledge);
+  if(crc_to_acknowledge){
+    // writing to buffer only if crc has changed, i.e. a new frame has been received
+    if(previously_acknowledged_crc != crc_to_acknowledge) {
+      #ifdef DEBUG
+      Serial.print("Acknowledging ");
+      Serial.println(crc_to_acknowledge);
+      #endif
+      write_ack_to_buffer(crc_to_acknowledge);
+    }
+    else {
+      resend_frame();
+    }
   }
 }
