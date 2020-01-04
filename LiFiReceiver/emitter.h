@@ -142,6 +142,12 @@ int write(char * data, int data_size){
   return 0 ;
 }
 
+void resend_frame(){
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+    frame_index = 0 ;
+  }
+}
+
 int transmitter_available(){
   if(frame_index >=  0) return 0 ;
   return 1 ; 
