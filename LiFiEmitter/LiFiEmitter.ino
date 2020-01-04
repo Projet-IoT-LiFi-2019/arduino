@@ -15,12 +15,18 @@
 
 //#define TRANSMIT_SERIAL
 
+// global communication buffer
+char com_buffer [32] ;
+char com_buffer_nb_bytes = 0 ;
+
+
 void isr(){
   static int i = 0;
   if(i == 0) emit_half_bit();
   else sample_signal_edge();
   i = ++i % SAMPLE_PER_SYMBOL;
 }
+
 
 // the setup routine runs once when you press reset:
 void setup() {
@@ -32,12 +38,22 @@ void setup() {
   Timer1.attachInterrupt(isr); 
 }
 
-// the loop routine runs over and over again forever:
-char * msg = "Hello World" ;
-char com_buffer [32] ;
-char com_buffer_nb_bytes = 0 ;
-void loop() {
-  #ifdef TRANSMIT_SERIAL
+
+void write_static_message_to_buffer(){
+  static char * msg = "Hello World" ; 
+  static int i = 0 ;
+  memcpy(com_buffer, msg, 11);
+  com_buffer[11] = i + '0' ;
+  if(write(com_buffer, 12) < 0){
+    delay(10);
+  }else{
+    i ++ ; 
+    if(i > 9) i = 0 ;
+  }
+}
+
+
+void write_serial_input_to_buffer(){
   if(Serial.available() && transmitter_available()){ //constructing the data frame only if transmitter is ready to transmit
     char c = Serial.read();
     com_buffer[com_buffer_nb_bytes] = c ;
@@ -50,16 +66,14 @@ void loop() {
       }
     }
   }
-  delay(10);
+}
+
+// the loop routine runs over and over again forever:
+void loop() {
+  #ifdef TRANSMIT_SERIAL
+  write_serial_input_to_buffer();
   #else
-    static int i = 0 ;
-    memcpy(com_buffer, msg, 11);
-    com_buffer[11] = i + '0' ;
-    if(write(com_buffer, 12) < 0){
-      delay(10);
-    }else{
-      i ++ ; 
-      if(i > 9) i = 0 ;
-    }
+  write_static_message_to_buffer();
   #endif
+  delay(10);
 }
