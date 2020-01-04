@@ -1,6 +1,17 @@
+#ifndef TIMERONE_H
+#define TIMERONE_H
 #include <TimerOne.h>
-#include "crc.h"
+#endif
+
+#ifndef EMITTER_H
+#define EMITTER_H
+#include "emitter.h"
+#endif
+
+#ifndef RECEIVER_H
+#define RECEIVER_H
 #include "receiver.h"
+#endif
 
 // the setup routine runs once when you press reset:
 void setup() {
