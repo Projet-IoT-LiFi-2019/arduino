@@ -30,10 +30,20 @@ A data frame is formatted as follow :
 N times Effective data excluding command symbols, with N < 32
 0x03 : ETX end of frame
 */
-
+#ifndef ATOMIC_H
+#define ATOMIC_H
 #include <util/atomic.h>
+#endif
+
+#ifndef TRANSMISSION_CONSTANTS_H
+#define TRANSMISSION_CONSTANTS_H
 #include "transmission_constants.h"
+#endif
+
+#ifndef CRC_H
+#define CRC_H
 #include "crc.h"
+#endif
 
 //Fast manipulation of LED IO. 
 //These defines are for a LED connected on D13
