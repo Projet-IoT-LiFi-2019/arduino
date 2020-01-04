@@ -66,6 +66,7 @@ N times Effective data excluding command symbols, with N < 32
 unsigned char frame_buffer [38] ; //buffer for frame
 char frame_index = -1; // index in frame
 char frame_size = -1  ; // size of the frame to be sent
+unsigned char frame_crc = -1; // crc of frame to be sent
 
 //state variables of the manchester encoder
 unsigned char bit_counter = 0 ;
@@ -124,7 +125,8 @@ void init_frame(unsigned char * frame){
 
 int create_frame(char * data, int data_size, unsigned char * frame){
   memcpy(&(frame[5]), data, data_size);
-  frame[5+data_size] = calc_crc(data, data_size);
+  frame_crc = calc_crc(data, data_size);
+  frame[5+data_size] = frame_crc;
   frame[5+data_size+1] = ETX;
   return 1 ;
 }
@@ -150,4 +152,8 @@ void init_emitter(){
   init_frame(frame_buffer);
   manchester_data = 0xFFFFFFFF ;
   bit_counter = WORD_LENGTH * 2 ;
+}
+
+unsigned char get_last_frame_crc(){
+  return frame_crc;
 }
