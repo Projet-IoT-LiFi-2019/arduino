@@ -216,8 +216,8 @@ int add_byte_to_frame(){
     return 0 ;
   }
   if(frame_state != IDLE){ // we are synced
-  rcv_frame_buffer[rcv_frame_index] = data ;
-  rcv_frame_index++ ;
+    rcv_frame_buffer[rcv_frame_index] = data ;
+    rcv_frame_index++ ;
     if(data == STX){
       //Serial.println("START");
       frame_state = START ;
