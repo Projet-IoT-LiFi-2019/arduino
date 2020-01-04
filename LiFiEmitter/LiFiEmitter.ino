@@ -22,8 +22,8 @@ char com_buffer_nb_bytes = 0 ;
 
 void isr(){
   static int i = 0;
+  sample_signal_edge();
   if(i == 0) emit_half_bit();
-  else sample_signal_edge();
   i = ++i % SAMPLE_PER_SYMBOL;
 }
 
@@ -41,10 +41,11 @@ void setup() {
 
 void write_static_message_to_buffer(){
   static char * msg = "Hello World" ; 
+  static int msg_len = strlen(msg);
   static int i = 0 ;
-  memcpy(com_buffer, msg, 11);
-  com_buffer[11] = i + '0' ;
-  if(write(com_buffer, 12) < 0){
+  memcpy(com_buffer, msg, msg_len);
+  com_buffer[msg_len] = i + '0' ;
+  if(write(com_buffer, strlen(com_buffer)) < 0){
     delay(10);
   }else{
     i ++ ; 
@@ -70,10 +71,26 @@ void write_serial_input_to_buffer(){
 
 // the loop routine runs over and over again forever:
 void loop() {
-  #ifdef TRANSMIT_SERIAL
-  write_serial_input_to_buffer();
-  #else
-  write_static_message_to_buffer();
-  #endif
-  delay(10);
+  static int last_frame_acknowledged = 1;
+  char * ack_data;
+
+  if(last_frame_acknowledged == 1){
+    #ifdef TRANSMIT_SERIAL
+    write_serial_input_to_buffer();
+    #else
+    write_static_message_to_buffer();
+    #endif
+    last_frame_acknowledged = 0;
+  }
+  else{
+    resend_frame();
+  }
+  
+  if(data_received()){
+    if(add_byte_to_frame() > 0){
+      ack_data = get_data();
+      Serial.println(ack_data);
+      last_frame_acknowledged = 1;
+    }
+  }
 }
