@@ -1,11 +1,19 @@
+#ifndef TIMERONE_H
+#define TIMERONE_H
 #include <TimerOne.h>
+#endif
+
+#ifndef EMITTER_H
+#define EMITTER_H
 #include "emitter.h"
+#endif
+
+#ifndef RECEIVER_H
+#define RECEIVER_H
+#include "receiver.h"
+#endif
 
 //#define TRANSMIT_SERIAL
-
-void sample_signal_edge(){
-  
-}
 
 void isr(){
   static int i = 0;
