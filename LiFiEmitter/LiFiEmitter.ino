@@ -27,6 +27,7 @@ void setup() {
   // initialize serial communication at 115200 bits per second:
   Serial.begin(115200);
   init_emitter();
+  init_receiver();
   Timer1.initialize(SYMBOL_PERIOD/SAMPLE_PER_SYMBOL); //1200 bauds for transmission, else we listen for ACK
   Timer1.attachInterrupt(isr); 
 }
