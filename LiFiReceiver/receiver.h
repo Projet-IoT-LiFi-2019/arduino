@@ -53,9 +53,9 @@ N times Effective data excluding command symbols, max length 32 bytes
 
 // global variables for frame decoding
 enum receiver_state frame_state = IDLE ;
-char frame_buffer[38] ;
-int frame_index  = -1 ;
-int frame_size = -1 ;
+char rcv_frame_buffer[38] ;
+int rcv_frame_index  = -1 ;
+int rcv_frame_size = -1 ;
 
 //Start of ADC managements functions
 void ADC_setup(){
@@ -208,30 +208,30 @@ unsigned char get_received_data(){
 int add_byte_to_frame(){
   unsigned char data = get_received_data();
   
-  if(data == SYNC_SYMBOL/* && frame_index < 0*/){
-    frame_index = 0 ;
-    frame_size = 0 ;
+  if(data == SYNC_SYMBOL/* && rcv_frame_index < 0*/){
+    rcv_frame_index = 0 ;
+    rcv_frame_size = 0 ;
     frame_state = SYNC ;
     //Serial.println("SYNC");
     return 0 ;
   }
   if(frame_state != IDLE){ // we are synced
-  frame_buffer[frame_index] = data ;
-  frame_index++ ;
+  rcv_frame_buffer[rcv_frame_index] = data ;
+  rcv_frame_index++ ;
     if(data == STX){
       //Serial.println("START");
       frame_state = START ;
        return 0 ;
     }else if(data == ETX){
       //Serial.println("END");
-      frame_size = frame_index ;
-      frame_index = -1 ;
+      rcv_frame_size = rcv_frame_index ;
+      rcv_frame_index = -1 ;
       frame_state = IDLE ;
       //Serial.println("END");
        return 1 ;
-    }else if(frame_index >= 38){ //frame is larger than max size of frame ...
-      frame_index = -1 ;
-      frame_size = -1 ;
+    }else if(rcv_frame_index >= 38){ //frame is larger than max size of frame ...
+      rcv_frame_index = -1 ;
+      rcv_frame_size = -1 ;
       frame_state = IDLE ;
       return -1 ;
     }else{
@@ -247,14 +247,14 @@ int data_received(){
 }
 
 int get_data_size(){
-  return frame_size-2;
+  return rcv_frame_size-2;
 }
 
 char * get_data(){
-  frame_buffer[get_data_size()] = '\0';
-  return &(frame_buffer[1]); 
+  rcv_frame_buffer[get_data_size()] = '\0';
+  return &(rcv_frame_buffer[1]); 
 }
 
 unsigned char get_crc_from_frame(){
-  return frame_buffer[get_data_size()];
+  return rcv_frame_buffer[get_data_size()];
 }
