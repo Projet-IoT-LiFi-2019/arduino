@@ -1,30 +1,25 @@
-#ifndef TIMERONE_H
-#define TIMERONE_H
 #include <TimerOne.h>
-#endif
-
-#ifndef EMITTER_H
-#define EMITTER_H
+#include<Wire.h>
 #include "emitter.h"
-#endif
-
-#ifndef RECEIVER_H
-#define RECEIVER_H
-#include "receiver.h"
-#endif
 
 //#define TRANSMIT_SERIAL
+
+#define TRUE 1
+#define FALSE 0
+
+#define ACK_CHANNEL 9
 
 // global communication buffer
 char com_buffer [32] ;
 char com_buffer_nb_bytes = 0 ;
+int last_frame_acknowledged = TRUE;
 
 
-void isr(){
-  static int i = 0;
-  sample_signal_edge();
-  if(i == 0) emit_half_bit();
-  i = ++i % SAMPLE_PER_SYMBOL;
+void message_acknowledged(int bytes) {
+  unsigned char acknowledged_crc = Wire.read();
+  last_frame_acknowledged = TRUE;
+  Serial.print("ACK ");
+  Serial.println(acknowledged_crc);
 }
 
 
@@ -33,9 +28,10 @@ void setup() {
   // initialize serial communication at 115200 bits per second:
   Serial.begin(115200);
   init_emitter();
-  init_receiver();
-  Timer1.initialize(SYMBOL_PERIOD/SAMPLE_PER_SYMBOL); //1200 bauds for transmission, else we listen for ACK
-  Timer1.attachInterrupt(isr); 
+  Timer1.initialize(SYMBOL_PERIOD); //1200 bauds for transmission
+  Timer1.attachInterrupt(emit_half_bit);
+  Wire.begin(ACK_CHANNEL); 
+  Wire.onReceive(message_acknowledged);  
 }
 
 
@@ -71,10 +67,9 @@ void write_serial_input_to_buffer(){
 
 // the loop routine runs over and over again forever:
 void loop() {
-  static int last_frame_acknowledged = 1;
   char * ack_data;
 
-  if(last_frame_acknowledged == 1){
+  if(last_frame_acknowledged == TRUE){
     #ifdef TRANSMIT_SERIAL
     write_serial_input_to_buffer();
     #else
@@ -84,13 +79,5 @@ void loop() {
   }
   else{
     resend_frame();
-  }
-  
-  if(data_received()){
-    if(add_byte_to_frame() > 0){
-      ack_data = get_data();
-      Serial.println(ack_data);
-      last_frame_acknowledged = 1;
-    }
   }
 }
