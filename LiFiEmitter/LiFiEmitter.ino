@@ -18,6 +18,9 @@ int last_frame_acknowledged = TRUE;
 void message_acknowledged(int bytes) {
   unsigned char acknowledged_crc = Wire.read();
   last_frame_acknowledged = TRUE;
+  #ifdef TRANSMIT_SERIAL
+  com_buffer_nb_bytes = 0 ;
+  #endif
   Serial.print("ACK ");
   Serial.println(acknowledged_crc);
 }
@@ -43,23 +46,28 @@ void write_static_message_to_buffer(){
   com_buffer[msg_len] = i + '0' ;
   if(write(com_buffer, strlen(com_buffer)) < 0){
     delay(10);
-  }else{
+  }else if(last_frame_acknowledged == TRUE){
     i ++ ; 
     if(i > 9) i = 0 ;
+    last_frame_acknowledged = FALSE;
   }
 }
 
 
 void write_serial_input_to_buffer(){
+  static char c;
   if(Serial.available() && transmitter_available()){ //constructing the data frame only if transmitter is ready to transmit
-    char c = Serial.read();
-    com_buffer[com_buffer_nb_bytes] = c ;
-    com_buffer_nb_bytes ++ ;
+    if(last_frame_acknowledged == TRUE){
+      c = Serial.read();
+      com_buffer[com_buffer_nb_bytes] = c ;
+      com_buffer_nb_bytes ++ ;
+    }
     if(com_buffer_nb_bytes >= 32 || c == '\n'){
+      last_frame_acknowledged == FALSE;
       if(write(com_buffer, com_buffer_nb_bytes) < 0){
-        Serial.println("Transmitter is busy");
-      }else{
-        com_buffer_nb_bytes = 0 ;
+        delay(10);
+      } else {
+        Serial.println("> Message sent.");
       }
     }
   }
@@ -67,18 +75,10 @@ void write_serial_input_to_buffer(){
 
 // the loop routine runs over and over again forever:
 void loop() {
-//  if(last_frame_acknowledged == TRUE){
-//    #ifdef TRANSMIT_SERIAL
-//    write_serial_input_to_buffer();
-//    #else
-//    write_static_message_to_buffer();
-//    #endif
-//    last_frame_acknowledged = FALSE;
-//    delay(10);
-//  }
-//  else{
-//    resend_frame();
-//  }
+  #ifdef TRANSMIT_SERIAL
+  write_serial_input_to_buffer();
+  #else
   write_static_message_to_buffer();
+  #endif
   delay(10);
 }
