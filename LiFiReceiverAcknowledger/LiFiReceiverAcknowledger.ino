@@ -1,4 +1,5 @@
 #include <TimerOne.h>
+#include<Wire.h>
 #include "emitter.h"
 
 #define ACK_CHANNEL 9
