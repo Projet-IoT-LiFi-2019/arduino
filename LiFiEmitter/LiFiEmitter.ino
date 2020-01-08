@@ -67,17 +67,18 @@ void write_serial_input_to_buffer(){
 
 // the loop routine runs over and over again forever:
 void loop() {
-  char * ack_data;
-
-  if(last_frame_acknowledged == TRUE){
-    #ifdef TRANSMIT_SERIAL
-    write_serial_input_to_buffer();
-    #else
-    write_static_message_to_buffer();
-    #endif
-    last_frame_acknowledged = 0;
-  }
-  else{
-    resend_frame();
-  }
+//  if(last_frame_acknowledged == TRUE){
+//    #ifdef TRANSMIT_SERIAL
+//    write_serial_input_to_buffer();
+//    #else
+//    write_static_message_to_buffer();
+//    #endif
+//    last_frame_acknowledged = FALSE;
+//    delay(10);
+//  }
+//  else{
+//    resend_frame();
+//  }
+  write_static_message_to_buffer();
+  delay(10);
 }
