@@ -25,11 +25,6 @@ void message_acknowledged(int bytes) {
     #endif
     Serial.print("ACK ");
     Serial.println(acknowledged_crc);
-  } else {
-    Serial.print("Wrong ACK - received ");
-    Serial.print(acknowledged_crc);
-    Serial.print(" and sent ");
-    Serial.println(last_frame_crc);
   }
 }
 
