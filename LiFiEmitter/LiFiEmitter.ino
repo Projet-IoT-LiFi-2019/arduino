@@ -17,12 +17,20 @@ int last_frame_acknowledged = TRUE;
 
 void message_acknowledged(int bytes) {
   unsigned char acknowledged_crc = Wire.read();
-  last_frame_acknowledged = TRUE;
-  #ifdef TRANSMIT_SERIAL
-  com_buffer_nb_bytes = 0 ;
-  #endif
-  Serial.print("ACK ");
-  Serial.println(acknowledged_crc);
+  unsigned char last_frame_crc = get_last_frame_crc();
+  if(acknowledged_crc == last_frame_crc){
+    last_frame_acknowledged = TRUE;
+    #ifdef TRANSMIT_SERIAL
+    com_buffer_nb_bytes = 0 ;
+    #endif
+    Serial.print("ACK ");
+    Serial.println(acknowledged_crc);
+  } else {
+    Serial.print("Wrong ACK - received ");
+    Serial.print(acknowledged_crc);
+    Serial.print(" and sent ");
+    Serial.println(last_frame_crc);
+  }
 }
 
 

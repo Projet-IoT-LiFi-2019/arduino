@@ -2,6 +2,8 @@
 #include "receiver.h"
 #include<Wire.h>
 
+#define DEBUG
+
 #define ACK_CHANNEL 9
 
 // the setup routine runs once when you press reset:
@@ -29,9 +31,10 @@ void loop() {
       crc = get_crc_from_frame();
       data = get_data();
       calculated_crc = calc_crc(data, data_size);
-      if(calculated_crc == crc)
+      if(calculated_crc == crc){
         Serial.println(data);
         crc_to_acknowledge = calculated_crc;
+      }
     }
   }
 

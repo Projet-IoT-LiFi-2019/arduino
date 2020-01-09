@@ -2,21 +2,25 @@
 #include<Wire.h>
 #include "emitter.h"
 
-#define ACK_CHANNEL 9
+#define DEBUG
 
+#define ACK_CHANNEL 9
 
 char com_buffer [32] ;
 void write_ack_to_buffer(unsigned char crc){
-  com_buffer[0] = crc + '0' ;
+  itoa(crc, com_buffer, 10);
   if(write(com_buffer, strlen(com_buffer)) < 0){
     delay(10);
   }
 }
 
-int crc_to_acknowledge = 0;
+unsigned char crc_to_acknowledge = 0;
 void acknowledge_message(int bytes) {
   crc_to_acknowledge = Wire.read();
+  #ifdef DEBUG
+  Serial.print("Order received to acknowledge ");
   Serial.println(crc_to_acknowledge);
+  #endif
 }
 
 void setup() {
